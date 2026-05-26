@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  @apply font-sans antialiased bg-gray-50 text-gray-900;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+input, textarea, select {
+  font-size: 16px; /* prevent iOS zoom */
+}
+
+/* Custom marker pin wrapper */
+.marker-pin-wrap {
+  position: relative;
+  width: 32px;
+  height: 42px;
+  cursor: pointer;
+  transform-origin: 50% 100%;
+}
+.marker-label {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 4px;
+  background: white;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #111827;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+  pointer-events: none;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Safe area utilities */
+.pt-safe { padding-top: env(safe-area-inset-top); }
+.pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+.pl-safe { padding-left: env(safe-area-inset-left); }
+.pr-safe { padding-right: env(safe-area-inset-right); }
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-thin::-webkit-scrollbar { width: 6px; }
+.scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 3px; }
+
+/* Map InfoWindow: remove default padding so our custom card fills it */
+.gm-style-iw,
+.gm-style-iw-c { padding: 0 !important; }
+.gm-style-iw-d { overflow: visible !important; padding: 0 !important; }
+.gm-style-iw-chr { display: none !important; }    /* hides Google's title bar when present */
+.gm-style-iw-tc { display: block; }                /* keep the speech-bubble tail */
+
+/* Animated dashed polyline */
+.route-loading {
+  stroke-dasharray: 8 8;
+  animation: dash 1.4s linear infinite;
+}
+@keyframes dash {
+  to { stroke-dashoffset: -20; }
+}
+
+/* Mobile: full-viewport map using dynamic vh for browser chrome */
+.h-dvh { height: 100dvh; }
