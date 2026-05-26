@@ -246,9 +246,7 @@ export default function MapPage() {
           markers={markers}
           routeLegs={routeLegs}
           routeLoading={recomputeRoute.isPending}
-          onMapClick={(latLng) => {
-            if (isDesktop) addMarkerAt(latLng);
-          }}
+          onMapDoubleClick={(latLng) => addMarkerAt(latLng)}
           onMapLongPress={(latLng) => addMarkerAt(latLng)}
           onMarkerDragEnd={handleMarkerDragEnd}
           onEditMarker={(mid) => {
