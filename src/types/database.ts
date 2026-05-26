@@ -64,14 +64,62 @@ export interface SavedPlace {
   created_at: string;
 }
 
+type EmptyObj = { [_ in never]: never };
+
 export interface Database {
   public: {
     Tables: {
-      profiles: { Row: Profile; Insert: Partial<Profile>; Update: Partial<Profile> };
-      maps: { Row: MapRecord; Insert: Partial<MapRecord>; Update: Partial<MapRecord> };
-      markers: { Row: Marker; Insert: Partial<Marker>; Update: Partial<Marker> };
-      route_legs: { Row: RouteLeg; Insert: Partial<RouteLeg>; Update: Partial<RouteLeg> };
-      saved_places: { Row: SavedPlace; Insert: Partial<SavedPlace>; Update: Partial<SavedPlace> };
+      profiles: {
+        Row: Profile;
+        Insert: Partial<Profile> & { id: string; email: string };
+        Update: Partial<Profile>;
+        Relationships: [];
+      };
+      maps: {
+        Row: MapRecord;
+        Insert: Partial<MapRecord> & { user_id: string };
+        Update: Partial<MapRecord>;
+        Relationships: [];
+      };
+      markers: {
+        Row: Marker;
+        Insert: Partial<Marker> & {
+          map_id: string;
+          user_id: string;
+          label: string;
+          sequence_order: number;
+          latitude: number;
+          longitude: number;
+        };
+        Update: Partial<Marker>;
+        Relationships: [];
+      };
+      route_legs: {
+        Row: RouteLeg;
+        Insert: Partial<RouteLeg> & {
+          map_id: string;
+          from_marker_id: string;
+          to_marker_id: string;
+          leg_order: number;
+        };
+        Update: Partial<RouteLeg>;
+        Relationships: [];
+      };
+      saved_places: {
+        Row: SavedPlace;
+        Insert: Partial<SavedPlace> & {
+          user_id: string;
+          label: string;
+          latitude: number;
+          longitude: number;
+        };
+        Update: Partial<SavedPlace>;
+        Relationships: [];
+      };
     };
+    Views: EmptyObj;
+    Functions: EmptyObj;
+    Enums: EmptyObj;
+    CompositeTypes: EmptyObj;
   };
 }
