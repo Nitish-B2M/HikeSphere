@@ -31,6 +31,7 @@ interface SaveTripDialogProps {
   onSave: (patch: { title: string; description: string | null; category: MapCategory }) => Promise<void>;
   saving?: boolean;
   markerCount: number;
+  isExisting?: boolean;
 }
 
 export function SaveTripDialog({
@@ -40,6 +41,7 @@ export function SaveTripDialog({
   onSave,
   saving,
   markerCount,
+  isExisting,
 }: SaveTripDialogProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -94,7 +96,7 @@ export function SaveTripDialog({
               </div>
               <div className="min-w-0 flex-1">
                 <Dialog.Title className="text-lg font-semibold text-gray-900">
-                  Save trip
+                  {isExisting ? 'Update trip' : 'Save trip'}
                 </Dialog.Title>
                 <p className="text-xs text-gray-500 mt-0.5">
                   {markerCount} {markerCount === 1 ? 'stop' : 'stops'} in order
@@ -187,7 +189,7 @@ export function SaveTripDialog({
               Cancel
             </Button>
             <Button variant="primary" onClick={handleSave} loading={saving}>
-              <Save className="h-4 w-4" /> Save trip
+              <Save className="h-4 w-4" /> {isExisting ? 'Update trip' : 'Save trip'}
             </Button>
           </div>
         </Dialog.Content>
