@@ -12,7 +12,7 @@ interface MapViewProps {
   markers: Marker[];
   routeLegs: RouteLeg[];
   routeLoading?: boolean;
-  onMapClick?: (latLng: LatLng) => void;
+  onMapDoubleClick?: (latLng: LatLng) => void;
   onMapLongPress?: (latLng: LatLng) => void;
   onMarkerDragEnd?: (markerId: string, latLng: LatLng) => void;
   onEditMarker?: (markerId: string) => void;
@@ -23,7 +23,7 @@ export function MapView({
   markers,
   routeLegs,
   routeLoading,
-  onMapClick,
+  onMapDoubleClick,
   onMapLongPress,
   onMarkerDragEnd,
   onEditMarker,
@@ -46,9 +46,10 @@ export function MapView({
         streetViewControl={false}
         fullscreenControl={false}
         clickableIcons={false}
+        disableDoubleClickZoom
         className="w-full h-full"
       >
-        <MapInteractions onClick={onMapClick} onLongPress={onMapLongPress} />
+        <MapInteractions onDoubleClick={onMapDoubleClick} onLongPress={onMapLongPress} />
         <FitBounds markers={markers} />
         {markers.map((m, i) => (
           <MarkerPin
@@ -88,10 +89,10 @@ export function MapView({
 }
 
 function MapInteractions({
-  onClick,
+  onDoubleClick,
   onLongPress,
 }: {
-  onClick?: (latLng: LatLng) => void;
+  onDoubleClick?: (latLng: LatLng) => void;
   onLongPress?: (latLng: LatLng) => void;
 }) {
   const map = useMap();
@@ -100,13 +101,13 @@ function MapInteractions({
 
   useEffect(() => {
     if (!map) return;
-    const clickListener = map.addListener('click', (e: google.maps.MapMouseEvent) => {
+    const clickListener = map.addListener('dblclick', (e: google.maps.MapMouseEvent) => {
       if (longFired.current) {
         longFired.current = false;
         return;
       }
       if (!e.latLng) return;
-      onClick?.({ lat: e.latLng.lat(), lng: e.latLng.lng() });
+      onDoubleClick?.({ lat: e.latLng.lat(), lng: e.latLng.lng() });
     });
     const downListener = map.addListener('mousedown', (e: google.maps.MapMouseEvent) => {
       if (!e.latLng) return;
@@ -134,7 +135,7 @@ function MapInteractions({
       upListener.remove();
       moveListener.remove();
     };
-  }, [map, onClick, onLongPress]);
+  }, [map, onDoubleClick, onLongPress]);
 
   return null;
 }
