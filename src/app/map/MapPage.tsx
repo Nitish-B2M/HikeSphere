@@ -394,9 +394,9 @@ export default function MapPage() {
             <MapFABs
               travelMode={travelMode}
               onChangeMode={handleChangeMode}
-              onAdd={() => window.scrollTo({ top: 0 })}
+              onAdd={isMobile ? undefined : () => window.scrollTo({ top: 0 })}
               onFit={handleFit}
-              onLocate={handleLocate}
+              onLocate={isMobile ? undefined : handleLocate}
             />
           </div>
         )}

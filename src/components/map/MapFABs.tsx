@@ -7,9 +7,9 @@ import { cn } from '@/lib/utils';
 interface MapFABsProps {
   travelMode: TravelMode;
   onChangeMode: (mode: TravelMode) => void;
-  onAdd: () => void;
+  onAdd?: () => void;
   onFit: () => void;
-  onLocate: () => void;
+  onLocate?: () => void;
   className?: string;
 }
 
@@ -31,15 +31,17 @@ export function MapFABs({ travelMode, onChangeMode, onAdd, onFit, onLocate, clas
           </button>
         ))}
       </div>
-      <Button
-        size="icon"
-        variant="outline"
-        onClick={onLocate}
-        aria-label="Use my location"
-        className="bg-white shadow-lg rounded-full"
-      >
-        <LocateFixed className="h-5 w-5" />
-      </Button>
+      {onLocate && (
+        <Button
+          size="icon"
+          variant="outline"
+          onClick={onLocate}
+          aria-label="Use my location"
+          className="bg-white shadow-lg rounded-full"
+        >
+          <LocateFixed className="h-5 w-5" />
+        </Button>
+      )}
       <Button
         size="icon"
         variant="outline"
@@ -49,15 +51,17 @@ export function MapFABs({ travelMode, onChangeMode, onAdd, onFit, onLocate, clas
       >
         <Crosshair className="h-5 w-5" />
       </Button>
-      <Button
-        size="icon"
-        variant="primary"
-        onClick={onAdd}
-        aria-label="Add marker"
-        className="shadow-lg rounded-full h-14 w-14"
-      >
-        <Plus className="h-6 w-6" />
-      </Button>
+      {onAdd && (
+        <Button
+          size="icon"
+          variant="primary"
+          onClick={onAdd}
+          aria-label="Add marker"
+          className="shadow-lg rounded-full h-14 w-14"
+        >
+          <Plus className="h-6 w-6" />
+        </Button>
+      )}
     </div>
   );
 }
