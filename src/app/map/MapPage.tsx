@@ -151,10 +151,8 @@ export default function MapPage() {
     }
   };
 
-  const handleFit = () => {
-    // FitBounds in MapView triggers once; emit a window resize to re-fit
-    window.dispatchEvent(new Event('resize'));
-  };
+  const [fitCounter, setFitCounter] = useState(0);
+  const handleFit = () => setFitCounter((c) => c + 1);
 
   if (!map) {
     return (
@@ -246,8 +244,9 @@ export default function MapPage() {
           markers={markers}
           routeLegs={routeLegs}
           routeLoading={recomputeRoute.isPending}
-          onMapDoubleClick={(latLng) => addMarkerAt(latLng)}
-          onMapLongPress={(latLng) => addMarkerAt(latLng)}
+          fitTrigger={fitCounter}
+          onMapDoubleClick={isMobile ? undefined : (latLng) => addMarkerAt(latLng)}
+          onMapLongPress={isMobile ? undefined : (latLng) => addMarkerAt(latLng)}
           onMarkerDragEnd={handleMarkerDragEnd}
           onEditMarker={(mid) => {
             setEditingId(mid);
