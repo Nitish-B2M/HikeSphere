@@ -12,6 +12,7 @@ interface MapViewProps {
   markers: Marker[];
   routeLegs: RouteLeg[];
   routeLoading?: boolean;
+  fitTrigger?: number; // increment to manually refit to all markers
   onMapDoubleClick?: (latLng: LatLng) => void;
   onMapLongPress?: (latLng: LatLng) => void;
   onMarkerDragEnd?: (markerId: string, latLng: LatLng) => void;
@@ -23,6 +24,7 @@ export function MapView({
   markers,
   routeLegs,
   routeLoading,
+  fitTrigger,
   onMapDoubleClick,
   onMapLongPress,
   onMarkerDragEnd,
@@ -50,7 +52,7 @@ export function MapView({
         className="w-full h-full"
       >
         <MapInteractions onDoubleClick={onMapDoubleClick} onLongPress={onMapLongPress} />
-        <FitBounds markers={markers} />
+        <FitBounds markers={markers} fitTrigger={fitTrigger} />
         {markers.map((m, i) => (
           <MarkerPin
             key={`${m.id}-${showLabels ? 'L' : 'NL'}`}
@@ -165,11 +167,12 @@ function MapInteractions({
   return null;
 }
 
-function FitBounds({ markers }: { markers: Marker[] }) {
+function FitBounds({ markers, fitTrigger }: { markers: Marker[]; fitTrigger?: number }) {
   const map = useMap();
-  const prevCount = useRef(0);
+  const hasInitialFit = useRef(false);
+  const lastTrigger = useRef<number | undefined>(undefined);
 
-  const fit = useCallback(() => {
+  const fitNow = useCallback(() => {
     if (!map || markers.length === 0) return;
     if (markers.length === 1) {
       map.panTo({ lat: markers[0].latitude, lng: markers[0].longitude });
@@ -181,17 +184,19 @@ function FitBounds({ markers }: { markers: Marker[] }) {
     map.fitBounds(bounds, 80);
   }, [map, markers]);
 
+  // Initial fit only.
   useEffect(() => {
-    if (!map || markers.length === 0) {
-      prevCount.current = markers.length;
-      return;
-    }
-    // Re-fit on initial load and whenever a new marker is added.
-    if (prevCount.current === 0 || markers.length > prevCount.current) {
-      fit();
-    }
-    prevCount.current = markers.length;
-  }, [map, markers, fit]);
+    if (!map || markers.length === 0 || hasInitialFit.current) return;
+    fitNow();
+    hasInitialFit.current = true;
+  }, [map, markers, fitNow]);
+
+  // Manual refit when fitTrigger increments.
+  useEffect(() => {
+    if (fitTrigger === undefined || fitTrigger === lastTrigger.current) return;
+    lastTrigger.current = fitTrigger;
+    if (hasInitialFit.current) fitNow(); // only after initial fit has run
+  }, [fitTrigger, fitNow]);
 
   return null;
 }
