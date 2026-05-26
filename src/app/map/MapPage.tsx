@@ -241,6 +241,7 @@ export default function MapPage() {
       {/* Map */}
       <div className="flex-1 relative">
         <MapView
+          mapId={map.id}
           markers={markers}
           routeLegs={routeLegs}
           routeLoading={recomputeRoute.isPending}
