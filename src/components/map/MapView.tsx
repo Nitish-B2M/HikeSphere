@@ -101,7 +101,16 @@ function MapInteractions({
 
   useEffect(() => {
     if (!map) return;
-    const clickListener = map.addListener('dblclick', (e: google.maps.MapMouseEvent) => {
+
+    const cancelPress = () => {
+      if (pressTimer.current) {
+        window.clearTimeout(pressTimer.current);
+        pressTimer.current = null;
+      }
+    };
+
+    // Double-click (or double-tap) drops a marker.
+    const dblClickListener = map.addListener('dblclick', (e: google.maps.MapMouseEvent) => {
       if (longFired.current) {
         longFired.current = false;
         return;
@@ -109,6 +118,8 @@ function MapInteractions({
       if (!e.latLng) return;
       onDoubleClick?.({ lat: e.latLng.lat(), lng: e.latLng.lng() });
     });
+
+    // Long-press (single finger held for 500ms) drops a marker.
     const downListener = map.addListener('mousedown', (e: google.maps.MapMouseEvent) => {
       if (!e.latLng) return;
       const pos = { lat: e.latLng.lat(), lng: e.latLng.lng() };
@@ -117,23 +128,37 @@ function MapInteractions({
         onLongPress?.(pos);
       }, 500);
     });
-    const upListener = map.addListener('mouseup', () => {
-      if (pressTimer.current) {
-        window.clearTimeout(pressTimer.current);
-        pressTimer.current = null;
-      }
-    });
-    const moveListener = map.addListener('drag', () => {
-      if (pressTimer.current) {
-        window.clearTimeout(pressTimer.current);
-        pressTimer.current = null;
-      }
-    });
+    const upListener = map.addListener('mouseup', cancelPress);
+    const dragListener = map.addListener('drag', cancelPress);
+    const zoomListener = map.addListener('zoom_changed', cancelPress);
+
+    // Native touch handling: cancel long-press the moment a 2nd finger lands
+    // (pinch-to-zoom), or after any meaningful movement, so we never drop a
+    // marker during a pinch / pan gesture.
+    const div = map.getDiv();
+    const onTouchStart = (e: TouchEvent) => {
+      if (e.touches.length > 1) cancelPress();
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      // Any second finger or any movement aborts the press.
+      if (e.touches.length > 1) cancelPress();
+    };
+    const onTouchEnd = () => cancelPress();
+    div.addEventListener('touchstart', onTouchStart, { passive: true });
+    div.addEventListener('touchmove', onTouchMove, { passive: true });
+    div.addEventListener('touchend', onTouchEnd, { passive: true });
+    div.addEventListener('touchcancel', onTouchEnd, { passive: true });
+
     return () => {
-      clickListener.remove();
+      dblClickListener.remove();
       downListener.remove();
       upListener.remove();
-      moveListener.remove();
+      dragListener.remove();
+      zoomListener.remove();
+      div.removeEventListener('touchstart', onTouchStart);
+      div.removeEventListener('touchmove', onTouchMove);
+      div.removeEventListener('touchend', onTouchEnd);
+      div.removeEventListener('touchcancel', onTouchEnd);
     };
   }, [map, onDoubleClick, onLongPress]);
 
