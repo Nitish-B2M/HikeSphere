@@ -135,7 +135,7 @@ function MapInteractions({
       upListener.remove();
       moveListener.remove();
     };
-  }, [map, onClick, onLongPress]);
+  }, [map, onDoubleClick, onLongPress]);
 
   return null;
 }
