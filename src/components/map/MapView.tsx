@@ -9,6 +9,7 @@ import { RoutePolyline } from './RoutePolyline';
 import { useMapStore } from '@/stores/mapStore';
 
 interface MapViewProps {
+  mapId: string; // for one-shot initial fit tracking
   markers: Marker[];
   routeLegs: RouteLeg[];
   routeLoading?: boolean;
@@ -21,6 +22,7 @@ interface MapViewProps {
 }
 
 export function MapView({
+  mapId,
   markers,
   routeLegs,
   routeLoading,
@@ -52,7 +54,7 @@ export function MapView({
         className="w-full h-full"
       >
         <MapInteractions onDoubleClick={onMapDoubleClick} onLongPress={onMapLongPress} />
-        <FitBounds markers={markers} fitTrigger={fitTrigger} />
+        <FitBounds mapId={mapId} markers={markers} fitTrigger={fitTrigger} />
         {markers.map((m, i) => (
           <MarkerPin
             key={`${m.id}-${showLabels ? 'L' : 'NL'}`}
@@ -167,9 +169,21 @@ function MapInteractions({
   return null;
 }
 
-function FitBounds({ markers, fitTrigger }: { markers: Marker[]; fitTrigger?: number }) {
+// Module-level guard: tracks which map IDs have had their initial fit run.
+// Survives component remounts so we NEVER auto-refit after the first time,
+// no matter how many times FitBounds re-mounts or React re-renders.
+const fittedMapIds = new Set<string>();
+
+function FitBounds({
+  markers,
+  mapId,
+  fitTrigger,
+}: {
+  markers: Marker[];
+  mapId: string;
+  fitTrigger?: number;
+}) {
   const map = useMap();
-  const hasInitialFit = useRef(false);
   const lastTrigger = useRef<number | undefined>(undefined);
 
   const fitNow = useCallback(() => {
@@ -184,36 +198,25 @@ function FitBounds({ markers, fitTrigger }: { markers: Marker[]; fitTrigger?: nu
     map.fitBounds(bounds, 80);
   }, [map, markers]);
 
-  // Initial fit only.
+  // Initial fit — runs exactly ONCE per map id, ever, across remounts.
   useEffect(() => {
-    if (!map || markers.length === 0 || hasInitialFit.current) return;
+    if (!map || markers.length === 0) return;
+    if (fittedMapIds.has(mapId)) return;
+    fittedMapIds.add(mapId);
     fitNow();
-    hasInitialFit.current = true;
-  }, [map, markers, fitNow]);
+  }, [map, mapId, markers, fitNow]);
 
-  // Manual refit when fitTrigger increments.
+  // Manual refit when fitTrigger increments (FAB button).
   useEffect(() => {
-    if (fitTrigger === undefined || fitTrigger === lastTrigger.current) return;
+    if (fitTrigger === undefined) return;
+    if (lastTrigger.current === undefined) {
+      lastTrigger.current = fitTrigger;
+      return;
+    }
+    if (fitTrigger === lastTrigger.current) return;
     lastTrigger.current = fitTrigger;
-    if (hasInitialFit.current) fitNow(); // only after initial fit has run
+    fitNow();
   }, [fitTrigger, fitNow]);
 
   return null;
-}
-
-export function useFitBounds() {
-  const map = useMap();
-  return useCallback(
-    (markers: Marker[]) => {
-      if (!map || markers.length === 0) return;
-      if (markers.length === 1) {
-        map.panTo({ lat: markers[0].latitude, lng: markers[0].longitude });
-        return;
-      }
-      const bounds = new google.maps.LatLngBounds();
-      markers.forEach((m) => bounds.extend({ lat: m.latitude, lng: m.longitude }));
-      map.fitBounds(bounds, 80);
-    },
-    [map]
-  );
 }
