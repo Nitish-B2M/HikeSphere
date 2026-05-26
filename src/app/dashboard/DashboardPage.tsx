@@ -53,7 +53,7 @@ export default function DashboardPage() {
             <div className="h-8 w-8 rounded-lg bg-brand-600 flex items-center justify-center text-white">
               <MapPin className="h-4 w-4" />
             </div>
-            <span className="font-semibold">Maps</span>
+            <span className="font-semibold">HikeSphere</span>
           </div>
           <div className="flex items-center gap-1">
             <Link

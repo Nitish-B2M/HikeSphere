@@ -15,9 +15,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg'],
       manifest: {
-        name: 'Multi Location Marker',
-        short_name: 'MapMarkers',
-        description: 'Plan multi-stop routes with markers on Google Maps',
+        name: 'HikeSphere',
+        short_name: 'HikeSphere',
+        description: 'Plan multi-stop trips, treks, and routes with HikeSphere',
         theme_color: '#4F46E5',
         background_color: '#ffffff',
         display: 'standalone',
